@@ -6,6 +6,8 @@ let total = document.getElementById('total');
 let interviewCount = document.getElementById("interview");
 let rejectCount = document.getElementById("reject");
 
+let 
+
 // get all button
 const allFilterBtn = document.getElementById('all-filter-btn');
 const interviewFilterBtn = document.getElementById('interview-filter-btn');

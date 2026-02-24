@@ -14,4 +14,10 @@ how its works: when it clicked ontargeted element the event start. then it moves
 
 ### 4. What is Event Delegation in JavaScript? Why is it useful?
 
+Answer: Event Delegation : when we add an event listener  to a parent element than we clicked anychild under that parent,  parent can handle event by event bubble
+
+why it is usefull: as parent can handle many child's listening so it's a memory saver, cleaner and shorter code.
+
 ### 5. What is the difference between preventDefault() and stopPropagation() methods?
+
+Ans: preventDefault() can't stop bubbling but stopPropagation() can do it.
