@@ -6,7 +6,7 @@ let total = document.getElementById('total');
 let interviewCount = document.getElementById("interview");
 let rejectCount = document.getElementById("reject");
 
-let 
+
 
 // get all button
 const allFilterBtn = document.getElementById('all-filter-btn');
@@ -249,3 +249,21 @@ function renderReject(){
       filterSection.appendChild(div)
    }
 }
+
+// delete button
+document.addEventListener("click", function(event){
+
+   console.log("Clicked:", event.target);
+
+   const deleteBtn = event.target.closest(".delete-btn");
+
+   if(deleteBtn){
+      console.log("Delete button detected");
+
+      const card = deleteBtn.closest(".jobCard");
+      console.log("Card found:", card);
+
+      card.style.display = "none";
+   }
+
+});
