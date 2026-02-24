@@ -1,122 +1,174 @@
+// ================== DATA ==================
 let interviewList = [];
 let rejectList = [];
 
-let total = document.getElementById('total');
-let interviewCount = document.getElementById("interview");
-let rejectCount = document.getElementById("reject")
+// ================== ELEMENTS ==================
+const total = document.getElementById('total');
+const interviewCount = document.getElementById("interview");
+const rejectCount = document.getElementById("reject");
 
- //console.log(reject);
-// get all button
 const allFilterBtn = document.getElementById('all-filter-btn');
 const interviewFilterBtn = document.getElementById('interview-filter-btn');
 const rejectFilterBtn = document.getElementById('reject-filter-btn');
 
-
- const allCardSection = document.getElementById('allCards');
- const mainContainer = document.getElementsByTagName('main');
- const mainContainer2 = document.getElementsByClassName('main-section')[0];
- const filterSection = document.getElementById('filtered-section')
-
- 
+const allCardSection = document.getElementById('allCards');
+const mainContainer = document.querySelector('.main-section');
+const filterSection = document.getElementById('filtered-section');
 
 
- function calculateCount(){
-    total.innerText = allCardSection.children.length
-    interviewCount.innerText = interviewList.length
-    rejectCount.innerText = rejectList
- }
+// ================== COUNT FUNCTION ==================
+function calculateCount(){
+   total.innerText = allCardSection.children.length;
+   interviewCount.innerText = interviewList.length;
+   rejectCount.innerText = rejectList.length;
+}
 
- calculateCount()
-
- function toggleStyle(id){
-  //initially color remove
-   allFilterBtn.classList.remove('bg-[#3b82f6]', 'text-white')
-   interviewFilterBtn.classList.remove('bg-[#3b82f6]', 'text-white')
-   rejectFilterBtn.classList.remove('bg-[#3b82f6]', 'text-white')
-
-    //add initial color
-   allFilterBtn.classList.add('bg-white', 'text-black')
-   interviewFilterBtn.classList.add('bg-white', 'text-black')
-   rejectFilterBtn.classList.add('bg-white', 'text-black')
-
-  //console.log(id);
-   const selected = document.getElementById(id)
+calculateCount();
 
 
-   console.log(selected);
-   // color change on selected item
-   selected.classList.remove('bg-white','text-black')
-   selected.classList.add('bg-blue-500', 'text-white')
+// ================== FILTER BUTTON STYLE ==================
+function toggleStyle(id){
 
- }
+   // reset style
+   [allFilterBtn, interviewFilterBtn, rejectFilterBtn].forEach(btn=>{
+      btn.classList.remove('bg-blue-500','text-white');
+      btn.classList.add('bg-white','text-black');
+   });
 
- mainContainer2.addEventListener('click', function(event){
+   const selected = document.getElementById(id);
+   selected.classList.remove('bg-white','text-black');
+   selected.classList.add('bg-blue-500','text-white');
 
-      // console.log(event.target.parentNode.parentNode);
-      console.log(event.target.classList.contains('interview'));
+   // SHOW SECTION
+   if(id === 'all-filter-btn'){
+      allCardSection.classList.remove('hidden');
+      filterSection.classList.add('hidden');
+   }
 
-   if(event.target.classList.contains('interview')){
-       const parenNode = event.target.parentNode.parentNode
-    console.log(parenNode, event.target)
-    const companyName = parenNode.querySelector('.companyName').textContent
-   const jobName = parenNode.querySelector('.jobName').textContent
-   const jobCriteria = parenNode.querySelector('.jobCriteria').textContent
-    const statusBadge = parenNode.querySelector('.statusBadge').textContent
-    const notes = parenNode.querySelector('.notes').textContent
+   else if(id === 'interview-filter-btn'){
+      renderList(interviewList);
+   }
+
+   else if(id === 'reject-filter-btn'){
+      renderList(rejectList);
+   }
+}
 
 
-    const cardInfo = {
+// ================== EVENT DELEGATION ==================
+mainContainer.addEventListener('click', function(event){
+
+   const card = event.target.closest('.jobCard');
+   if(!card) return;
+
+   const companyName = card.querySelector('.companyName').textContent;
+   const jobName = card.querySelector('.jobName').textContent;
+   const jobCriteria = card.querySelector('.jobCriteria').textContent;
+   const notes = card.querySelector('.notes').textContent;
+   const badge = card.querySelector('.statusBadge');
+
+   const cardInfo = {
       companyName,
-      jobName, 
-      jobCriteria, 
-      statusBadge, 
+      jobName,
+      jobCriteria,
       notes
-    }
+   };
 
-    const companyExist = interviewList.find(items=> items.companyName == cardInfo.companyName)
+   // ========= INTERVIEW =========
+   if(event.target.classList.contains('interview')){
 
-    parenNode.querySelector('.statusBadge').innerText = 'Interview'
-   
-   if(!companyExist) {
-      interviewList.push(cardInfo)
+      badge.innerText = 'Interview';
+
+      // remove from reject list if exists
+      rejectList = rejectList.filter(item => item.companyName !== companyName);
+
+      // add to interview list (no duplicate)
+      if(!interviewList.find(item => item.companyName === companyName)){
+         interviewList.push({...cardInfo, status:'Interview'});
+      }
+
+      calculateCount();
    }
-   renderInterview()
+
+   // ========= REJECT =========
+   else if(event.target.classList.contains('reject')){
+
+      badge.innerText = 'Rejected';
+
+      // remove from interview list if exists
+      interviewList = interviewList.filter(item => item.companyName !== companyName);
+
+      // add to reject list
+      if(!rejectList.find(item => item.companyName === companyName)){
+         rejectList.push({...cardInfo, status:'Rejected'});
+      }
+
+      calculateCount();
    }
-    
- })
+
+});
 
 
- function renderInterview() {
-    filterSection.innerHTML = ''
+// ================== RENDER FUNCTION ==================
+function renderList(list){
 
-   for(let interview of interviewList){
-      console.log(interview);
-      let div = document.createElement('div');
-      div.className = 'jobCard bg-[#ffffff] p-6 md:flex rounded-md '
+   filterSection.innerHTML = '';
+   allCardSection.classList.add('hidden');
+   filterSection.classList.remove('hidden');
+
+   if(list.length === 0){
+      filterSection.innerHTML = `
+         <div class="text-center bg-white p-10 rounded-md">
+            <p class="font-bold text-gray-600">No Data Found</p>
+         </div>
+      `;
+      return;
+   }
+
+   list.forEach(item=>{
+
+      const div = document.createElement('div');
+      div.className = 'jobCard bg-white p-6 md:flex rounded-md';
+
       div.innerHTML = `
-           <div class="left space-y-2">
-                 
+         <div class="left space-y-2">
+
             <div>
-                <p class=" companyName text-[#002c5c] font-bold">Mobile First Corp</p>
-                <p class="jobName  text-[#64748b]">React Native Developer</p>
+               <p class="companyName text-[#002c5c] font-bold">
+                  ${item.companyName}
+               </p>
+               <p class="jobName text-[#64748b]">
+                  ${item.jobName}
+               </p>
             </div>
-           
-        
-        <div>
-            <p class=" jobCriteria text-[#64748b]">Remote • Full-time • $130,000 - $175,000</p>
-        </div>
-         
-        <button class=" statusBadge bg-[#eef4ff] text-[64748b] py-2 px-3 rounded-md">Not Applicable</button>
 
-         <p class=" notes text-[#323b49]">Build cross-platform mobile applications using React Native. Work on products used by millions of users worldwide.</p>
+            <div>
+               <p class="jobCriteria text-[#64748b]">
+                  ${item.jobCriteria}
+               </p>
+            </div>
 
-         <div class="flex gap-2">
-            <button class="interview  bg-[#ffffff] py-3 px-6 text-[#10b981] rounded-md border border-green-600">Interview</button> 
-             <button class="reject  bg-[#ffffff] py-3 px-6 text-[#ef4444] rounded-md border border-red-600">Rejected</button>  
-         </div></div>
+            <button class="statusBadge bg-[#eef4ff] py-2 px-3 rounded-md">
+               ${item.status}
+            </button>
 
-      `
-   }
+            <p class="notes text-[#323b49]">
+               ${item.notes}
+            </p>
 
- }
+            <div class="flex gap-2">
+               <button class="interview bg-white py-3 px-6 text-[#10b981] rounded-md border border-green-600">
+                  Interview
+               </button>
+               <button class="reject bg-white py-3 px-6 text-[#ef4444] rounded-md border border-red-600">
+                  Rejected
+               </button>
+            </div>
 
+         </div>
+      `;
+
+      filterSection.appendChild(div);
+   });
+
+}
